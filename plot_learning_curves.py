@@ -4,7 +4,8 @@ import numpy as np
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description='plot learnign curve.')
+
+    parser = argparse.ArgumentParser(description='plot learning curve.')
     parser.add_argument('history_file', type=str,
                         help="path to history file.")
     parser.add_argument('--plot_style', nargs='*', default=[],
@@ -20,14 +21,14 @@ if __name__ == "__main__":
 
     # Plot MAE
     fig, ax = plt.subplots()
-    ax.plot(df['epoch']+1, df['mae'], label='train', color='blue')
+    ax.plot(df['epoch'] + 1, df['mae'], label='train', color='blue')
     ax.set_xlabel('epoch')
     ax.set_ylabel('MAE (years)', color='blue')
     ax.set_ylim((8, 14))
     axt = ax.twinx()
 
     # Plot learning rate
-    axt.step(df['epoch']+1, df['lr'], label='train', alpha=0.4, color='k')
+    axt.step(df['epoch'] + 1, df['lr'], label='train', alpha=0.4, color='k')
     axt.set_yscale('log')
     axt.set_ylabel('learning rate', alpha=0.4, color='k')
     axt.set_ylim((1e-8, 1e-2))

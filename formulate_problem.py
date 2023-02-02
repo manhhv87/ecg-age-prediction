@@ -6,14 +6,18 @@ def get_splits(age_at_exam, patient_ids, exam_ids, splits, min_age_valid=16, max
     rng = np.random.RandomState(seed)
     if sum(splits) > 1.0:
         raise ValueError('splits should be sum to a number smaller than one.')
+
     n_exams = len(exam_ids)
+
     # Get patients
     patients = np.unique(patient_ids)
     n_patients = len(patients)
+
     # Create correspondence
     hash_exams = dict(zip(exam_ids, range(n_exams)))
     hash_patients = dict(zip(patients, range(n_patients)))
     inverse_hash_patients = dict(zip(range(n_patients), patients))
+
     # Get all exams for each patient
     patient_exams = [[] for _ in range(n_patients)]
     for exam_idx in range(n_exams):
@@ -26,6 +30,7 @@ def get_splits(age_at_exam, patient_ids, exam_ids, splits, min_age_valid=16, max
     ages, _, _ = np.unique(age_at_exam, return_inverse=True, return_counts=True)
     patient_idx_per_age = {a: [] for a in ages}
     patient_single_exam = np.zeros(n_patients, dtype=int)
+
     for patient_idx in range(n_patients):
         # Pick random exam id for the given patient
         # OBS:Another formulation that could make sense could be to always pick the first exam....
@@ -38,13 +43,16 @@ def get_splits(age_at_exam, patient_ids, exam_ids, splits, min_age_valid=16, max
     # Get number of patient in each split
     n_splits = [int(np.floor(s * n_patients)) for s in splits]
     n_splits += [n_patients - sum(n_splits)]
+
     # Shuffle
     rng.shuffle(ages)  # Shuffle ages
     for a, patient_idx in patient_idx_per_age.items():  # Shuffle within the same age
         rng.shuffle(patient_idx)
+
     # Pick one id per age and build a list from that
     all_patient_idx = []
     stop = False
+
     # Pick ids within the given range first (which will probably be used for training, validation and test)
     while not stop:
         stop = True
@@ -53,6 +61,7 @@ def get_splits(age_at_exam, patient_ids, exam_ids, splits, min_age_valid=16, max
                 patient_idx = patient_idx_per_age[a].pop()
                 all_patient_idx.append(patient_idx)
                 stop = False
+
     # Pick remaining ids last (which will probably be used only for training)
     stop = False
     while not stop:
@@ -62,6 +71,7 @@ def get_splits(age_at_exam, patient_ids, exam_ids, splits, min_age_valid=16, max
                 patient_idx = patient_idx_per_age[a].pop()
                 all_patient_idx.append(patient_idx)
                 stop = False
+
     # Save ids
     patients_in_splits = [[] for n in n_splits]
     single_exam_in_split = [[] for n in n_splits]
@@ -83,6 +93,7 @@ if __name__ == "__main__":
     import warnings
 
     parser = argparse.ArgumentParser(description='Generate data summary for the age prediction problem')
+
     parser.add_argument('file',
                         help='csv file to read data from.')
     parser.add_argument('--exam_id_col', default='N_exame',
@@ -98,23 +109,29 @@ if __name__ == "__main__":
     parser.add_argument('--no_plot', action='store_true',
                         help='dont show plots')
     args, unk = parser.parse_known_args()
+
     if unk:
         warnings.warn("Unknown arguments:" + str(unk) + ".")
 
     # Open csv file
     df = pd.read_csv(args.file, low_memory=False)
+
     # Remove duplicated rows
     df.drop_duplicates(args.exam_id_col, inplace=True)
+
     # Get ids from csv file
     exam_ids = np.array(df[args.exam_id_col], dtype=int)
     age_at_exam = np.array(df[args.age_col])
     patient_ids = np.array(df[args.patient_id_col], dtype=int)
+
     # define splits
-    patients_in_splits, single_exam_in_split, exams_in_splits = get_splits(age_at_exam, patient_ids, exam_ids, args.splits)
+    patients_in_splits, single_exam_in_split, exams_in_splits = get_splits(age_at_exam, patient_ids, exam_ids,
+                                                                           args.splits)
 
     if not args.no_plot:
         import seaborn as sns
         import matplotlib.pyplot as plt
+
         n = len(args.splits) + 1
         fig, ax = plt.subplots(nrows=n)
         for i in range(n):
@@ -123,4 +140,3 @@ if __name__ == "__main__":
             sns.histplot(age, ax=ax[i], kde=False, bins=range(0, 130, 1))
             sns.histplot(age_single_exam, ax=ax[i], kde=False, bins=range(0, 130, 1))
         plt.show()
-

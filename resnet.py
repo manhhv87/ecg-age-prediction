@@ -9,7 +9,7 @@ def _padding(downsample, kernel_size):
 
 
 def _downsample(n_samples_in, n_samples_out):
-    """Compute downsample rate"""
+    """Compute down-sample rate"""
     downsample = int(n_samples_in // n_samples_out)
     if downsample < 1:
         raise ValueError("Number of samples should always decrease")
@@ -26,6 +26,7 @@ class ResBlock1d(nn.Module):
         if kernel_size % 2 == 0:
             raise ValueError("The current implementation only support odd values for `kernel_size`.")
         super(ResBlock1d, self).__init__()
+
         # Forward path
         padding = _padding(1, kernel_size)
         self.conv1 = nn.Conv1d(n_filters_in, n_filters_out, kernel_size, padding=padding, bias=False)
@@ -40,7 +41,8 @@ class ResBlock1d(nn.Module):
 
         # Skip connection
         skip_connection_layers = []
-        # Deal with downsampling
+
+        # Deal with down-sampling
         if downsample > 1:
             maxpool = nn.MaxPool1d(downsample, stride=downsample)
             skip_connection_layers += [maxpool]
@@ -48,7 +50,8 @@ class ResBlock1d(nn.Module):
         if n_filters_in != n_filters_out:
             conv1x1 = nn.Conv1d(n_filters_in, n_filters_out, 1, bias=False)
             skip_connection_layers += [conv1x1]
-        # Build skip conection layer
+
+        # Build skip connection layer
         if skip_connection_layers:
             self.skip_connection = nn.Sequential(*skip_connection_layers)
         else:
@@ -103,6 +106,7 @@ class ResNet1d(nn.Module):
 
     def __init__(self, input_dim, blocks_dim, n_classes, kernel_size=17, dropout_rate=0.8):
         super(ResNet1d, self).__init__()
+
         # First layers
         n_filters_in, n_filters_out = input_dim[0], blocks_dim[0][0]
         n_samples_in, n_samples_out = input_dim[1], blocks_dim[0][1]
@@ -142,7 +146,6 @@ class ResNet1d(nn.Module):
         # Flatten array
         x = x.view(x.size(0), -1)
 
-        # Fully conected layer
+        # Fully connected layer
         x = self.lin(x)
         return x
-

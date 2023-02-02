@@ -11,7 +11,7 @@ class BatchDataloader:
         self.mask = mask
         if nonzero_idx.size > 0:
             self.start_idx = min(nonzero_idx)
-            self.end_idx = max(nonzero_idx)+1
+            self.end_idx = max(nonzero_idx) + 1
         else:
             self.start_idx = 0
             self.end_idx = 0
