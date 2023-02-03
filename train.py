@@ -192,8 +192,8 @@ if __name__ == "__main__":
     weights = compute_weights(ages)
 
     # Dataloader
-    train_loader = BatchDataloader(traces, ages, weights, bs=args.batch_size, mask=train_mask)
-    valid_loader = BatchDataloader(traces, ages, weights, bs=args.batch_size, mask=valid_mask)
+    train_loader = BatchDataloader(traces, ages, weights, batch_size=args.batch_size, mask=train_mask)
+    valid_loader = BatchDataloader(traces, ages, weights, batch_size=args.batch_size, mask=valid_mask)
     tqdm.write("Done!")
 
     tqdm.write("Define model...")
